@@ -35,21 +35,20 @@ def consume_x_data():
 
     consumer = get_kafka_consumer()
     producer = get_kafka_producer()
-
+    i = 0
     while (True):
+        i = i + 1
         msg = consumer.poll(timeout=1.0)
         if msg is None: continue
         message = json.loads(msg.value().decode("utf-8"))
-
         #Predict here
-        print(message['x'])
         val = model.predict_one(message['x'])
-        print(val)
         message['y_hat'] = val
-        print(message)
-        print(message)
         producer.produce(y_hat_topic,json.dumps(message).encode('utf-8'))
         producer.flush()
+        if(i%100==0):
+            print(i)
+            print(message)
 
         uuid = message['uuid']
         with open(os.path.join(app_config['root_folder'],app_config['raw_data_folder'],app_config['data_sub_folder'],uuid),'w') as f:

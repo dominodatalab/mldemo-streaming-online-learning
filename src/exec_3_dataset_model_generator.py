@@ -129,7 +129,10 @@ def create_versioned_model():
 
 app_config = json.load(open("../config/app_config.json"))
 
-if __name__ == '__main__':
+def execute():
     create_versioned_data()
-    create_versioned_model()
+    create_versioned_model()   
+
+if __name__ == '__main__':
+    execute()
 
