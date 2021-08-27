@@ -1,0 +1,14 @@
+{
+  "root_folder": "/Users/sameerwadkar/domino_demos/online_learning/",
+  "raw_data_folder" : "raw_data",
+  "data_sub_folder": "data",
+  "truth_sub_folder": "truth",
+  "models_sub_folder" : "models",
+  "dataset_metadata_config_file" : "config/dataset_metadata.json",
+  "model_metadata_config_file" : "config/model_metadata.json",
+  "datasets_sub_folder" : "datasets",
+  "dataset_file_name" : "dataset.json",
+  "model_f_name" : "model.pkl",
+  "metrics_f_name" : "metrics.pkl",
+  "latest_version" : "current"
+}
