@@ -126,7 +126,7 @@ def publish_data():
             producer.produce(x_topic, value=json.dumps(data).encode('utf-8'), key=uuid)
             producer.flush()
             #Delay in producing y value. Truth arrives later
-            time.sleep(1)
+            time.sleep(10)
             data = {'y':y_data,'uuid':uuid , 'uid':u_id}
             #with open(os.path.join(app_config['root_folder'],app_config['raw_data_folder'],app_config['truth_sub_folder'],uuid),'w') as f:
                 #v = json.dumps(data).encode('utf-8')
