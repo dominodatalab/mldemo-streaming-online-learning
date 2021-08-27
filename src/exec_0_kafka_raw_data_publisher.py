@@ -16,12 +16,8 @@ from river import preprocessing
 import time
 from confluent_kafka import Producer, Consumer, KafkaException, KafkaError, TopicPartition
 import  certifi
-
-
-def create_empty_model():
-    model = compose.Pipeline(preprocessing.StandardScaler(),linear_model.LogisticRegression())
-    acc_metric = metrics.Accuracy()
-    recall_metric = metrics.Recall()
+def create_initial_model(model,acc_metric,recall_metric):
+    #model = compose.Pipeline(preprocessing.StandardScaler(),linear_model.LogisticRegression())
 
     current_model_path = os.path.join(app_config['root_folder'], app_config['models_sub_folder'], app_config['latest_version'],
                                       app_config['model_f_name'])
@@ -68,12 +64,15 @@ def initialize():
         json.dump(dataset_version,f)
     with open(os.path.join(app_config['root_folder'],app_config['model_metadata_config_file']),'w', encoding='utf-8') as f:
         json.dump(model_version,f)
-    create_empty_model()
+
 
 def publish_data():
     model = compose.Pipeline(preprocessing.StandardScaler(), linear_model.LogisticRegression())
 
     acc_metric = metrics.Accuracy()
+
+    recall_metric = metrics.Recall()
+
     producer = get_kafka_producer()
     random.seed(100)
     # Can set the number of rows, number of classes and number of features
@@ -87,7 +86,7 @@ def publish_data():
                                                 n_features=n_features, n_informative=2, n_redundant=0, n_repeated=0)
     x = data[0]
     y = data[1]
-    print(y)
+
     userid = []
     for i in range(1,10000):
         userid.append(random.randint(1,10000))
@@ -106,27 +105,33 @@ def publish_data():
         x_d = {}
         for j in range(n_features):
             x_d['v' + str(j)] = x_data[j]
-        print(x_d)
         data = {'x':x_d,'y_hat':'','uuid':uuid , 'uid':u_id, 'y_real':y_data}
-        print(x_d)
+        if(i<1000):
+            y_pred = model.predict_one(x_d)
+            #print(str(y_data) + "-" + str(y_pred))
+            #print(str(y_data) + "-" + str(y_pred))
+            model = model.learn_one(x_d,y_data)
 
-        y_pred = model.predict_one(x_d)
-        print(str(y_data) + "-" + str(y_pred))
-        model = model.learn_one(x_d,y_data)
-
-        acc_metric = acc_metric.update(y_data, y_pred)
-        print(acc_metric)
-        #with open(os.path.join(app_config['root_folder'],app_config['raw_data_folder'],app_config['data_sub_folder'],uuid),'w') as f:
-            #f.write(json.dumps(data))
-        producer.produce(x_topic, value=json.dumps(data).encode('utf-8'), key=uuid)
-        producer.flush()
-        #Delay in producing y value. Truth arrives later
-        time.sleep(1)
-        data = {'y':y_data,'uuid':uuid , 'uid':u_id}
-        #with open(os.path.join(app_config['root_folder'],app_config['raw_data_folder'],app_config['truth_sub_folder'],uuid),'w') as f:
-            #v = json.dumps(data).encode('utf-8')
-        producer.produce(y_topic, value=json.dumps(data).encode('utf-8'), key=uuid)
-        producer.flush()
+            acc_metric = acc_metric.update(y_data, y_pred)
+            recall_metric.update(y_data, y_pred)
+            #print(acc_metric)
+            if(i==999):
+                create_initial_model(model,acc_metric,recall_metric)
+                print(acc_metric)
+                print(recall_metric)
+                print('Initial Model Created')
+        else:
+            #with open(os.path.join(app_config['root_folder'],app_config['raw_data_folder'],app_config['data_sub_folder'],uuid),'w') as f:
+                #f.write(json.dumps(data))
+            producer.produce(x_topic, value=json.dumps(data).encode('utf-8'), key=uuid)
+            producer.flush()
+            #Delay in producing y value. Truth arrives later
+            time.sleep(1)
+            data = {'y':y_data,'uuid':uuid , 'uid':u_id}
+            #with open(os.path.join(app_config['root_folder'],app_config['raw_data_folder'],app_config['truth_sub_folder'],uuid),'w') as f:
+                #v = json.dumps(data).encode('utf-8')
+            producer.produce(y_topic, value=json.dumps(data).encode('utf-8'), key=uuid)
+            producer.flush()
 
 def get_kafka_producer():
     curdir = os.getcwd()
