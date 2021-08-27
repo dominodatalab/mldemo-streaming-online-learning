@@ -146,16 +146,3 @@ if __name__ == '__main__':
     print('Starting Data Publish')
     initialize()
     publish_data()
-    '''
-    data_folder = root_folder + data_sub_folder
-    truth_folder = root_folder + truth_sub_folder
-    datasets_folder = root_folder + datasets_sub_folder
-    dataset_metadata_config = root_folder + dataset_metadata_config_file
-    model_metadata_config = root_folder + model_metadata_config_file
-    print('Initializing')
-    initialize()
-    '''
-    #create_initial_data()
-    #gen_data(data_folder,truth_folder)
-    #create_versioned_data(dataset_metadata_config,truth_folder,data_folder,datasets_folder)
-    #create_versioned_model()

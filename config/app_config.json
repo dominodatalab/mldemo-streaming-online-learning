@@ -1,5 +1,5 @@
 {
-  "root_folder": "/Users/sameerwadkar/domino_demos/online_learning/",
+  "root_folder": "/mnt/data/ML_STREAMING_ONLINE_LEARNING",
   "raw_data_folder" : "raw_data",
   "data_sub_folder": "data",
   "truth_sub_folder": "truth",
